@@ -1,0 +1,3 @@
+For development:
+
+    fab -H vagrant deploy:master
