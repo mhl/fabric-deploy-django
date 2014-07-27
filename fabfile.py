@@ -70,3 +70,8 @@ def deploy(committish):
                 sudo('export PATH="{}:$PATH" && ./manage.py collectstatic --noinput'.format(yuglify_bin_dir))
                 sudo('./manage.py syncdb --noinput')
                 sudo('./manage.py migrate')
+
+        # FIXME: we actually want to do this in a gunicorn pre_exec hook
+        # -f and -n are needed to make sure that it overwrites the existing
+        # 'current' symlink:
+        sudo("ln -sfn {} {}".format(timestamp, current_release_dir))
