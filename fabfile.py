@@ -17,7 +17,6 @@ def host_type():
 
 def deploy(committish):
     with settings(sudo_user=unix_user):
-        sudo("ls /var/www")
         timestamp = datetime.utcnow().replace(microsecond=0).isoformat()
 
         new_release_dir = os.path.join(site_root, 'releases', timestamp)
