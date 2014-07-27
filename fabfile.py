@@ -2,6 +2,7 @@ import os
 
 from datetime import datetime
 from fabric.api import env, run, settings, sudo, cd
+from fabvenv import virtualenv
 
 
 env.use_ssh_config = True
@@ -18,8 +19,11 @@ def deploy(committish):
     with settings(sudo_user=unix_user):
         sudo("ls /var/www")
         timestamp = datetime.utcnow().replace(microsecond=0).isoformat()
+
         new_release_dir = os.path.join(site_root, 'releases', timestamp)
         new_repo_dir = os.path.join(new_release_dir, 'example-repository')
+        current_release_dir = os.path.join(site_root, 'releases', 'current')
+        current_repo_dir = os.path.join(current_release_dir, 'example-repository')
         sudo('mkdir -p {}'.format(new_release_dir))
 
         with cd(new_release_dir):
@@ -29,3 +33,23 @@ def deploy(committish):
 
         with cd(new_repo_dir):
             sudo('git checkout {}'.format(committish))
+            short_commit = sudo('git rev-parse --short HEAD').strip()
+
+        new_requirements = os.path.join(new_repo_dir, 'requirements.txt')
+        current_requirements = os.path.join(current_repo_dir, 'requirements.txt')
+        new_virtualenv_symlink = os.path.join(new_release_dir, 'virtualenv')
+
+        diff_command = "diff {} {}"
+        diff = sudo(diff_command.format(current_requirements, new_requirements),
+                    warn_only=True)
+        if diff.return_code != 0:
+            # This means that either requirements.txt has changes or that this
+            # is the first deploy and current_requirements doesn't exist. In
+            # both cases we need to create a new virtualenv.
+            new_virtualenv_dir = os.path.join(site_root, 'virtualenvs', short_commit)
+
+            sudo("virtualenv --no-site-packages " + new_virtualenv_dir)
+
+            sudo("ln -s {} {}".format(new_virtualenv_dir, new_virtualenv_symlink))
+            with virtualenv(new_virtualenv_symlink):
+                sudo('pip install -q -r ' + new_requirements)
