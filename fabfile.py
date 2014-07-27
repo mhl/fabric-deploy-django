@@ -1,6 +1,6 @@
-import os
-
 from datetime import datetime
+from os.path import join
+
 from fabric.api import env, run, settings, sudo, cd
 from fabvenv import virtualenv
 
@@ -21,10 +21,10 @@ def deploy(committish):
         timestamp = datetime.utcnow().replace(microsecond=0).isoformat()
         timestamp = timestamp.replace(':', '.')
 
-        new_release_dir = os.path.join(site_root, 'releases', timestamp)
-        new_repo_dir = os.path.join(new_release_dir, 'example-repository')
-        current_release_dir = os.path.join(site_root, 'releases', 'current')
-        current_repo_dir = os.path.join(current_release_dir, 'example-repository')
+        new_release_dir = join(site_root, 'releases', timestamp)
+        new_repo_dir = join(new_release_dir, 'example-repository')
+        current_release_dir = join(site_root, 'releases', 'current')
+        current_repo_dir = join(current_release_dir, 'example-repository')
         sudo('mkdir -p {}'.format(new_release_dir))
 
         with cd(new_release_dir):
@@ -36,22 +36,22 @@ def deploy(committish):
             sudo('git checkout {}'.format(committish))
             short_commit = sudo('git rev-parse --short HEAD').strip()
 
-        new_requirements = os.path.join(new_repo_dir, 'requirements.txt')
-        current_requirements = os.path.join(current_repo_dir, 'requirements.txt')
-        new_virtualenv_symlink = os.path.join(new_release_dir, 'virtualenv')
+        new_requirements = join(new_repo_dir, 'requirements.txt')
+        current_requirements = join(current_repo_dir, 'requirements.txt')
+        new_virtualenv_symlink = join(new_release_dir, 'virtualenv')
 
         diff_command = "diff {} {}".format(current_requirements, new_requirements)
         diff = sudo(diff_command, warn_only=True)
         if diff.return_code == 0:
             # requirements.txt for the new release is the same as for the
             # current one, so we can re-use its virtualenv.
-            current_virtualenv = sudo("readlink -n -f " + os.path.join(current_release_dir, 'virtualenv'))
+            current_virtualenv = sudo("readlink -n -f " + join(current_release_dir, 'virtualenv'))
             sudo("ln -s {} {}".format(current_virtualenv, new_virtualenv_symlink))
         else:
             # This means that either requirements.txt has changes or that this
             # is the first deploy and current_requirements doesn't exist. In
             # both cases we need to create a new virtualenv.
-            new_virtualenv_dir = os.path.join(site_root, 'virtualenvs', short_commit)
+            new_virtualenv_dir = join(site_root, 'virtualenvs', short_commit)
 
             sudo("virtualenv --no-site-packages " + new_virtualenv_dir)
 
@@ -65,7 +65,7 @@ def deploy(committish):
             with cd(new_repo_dir):
                 # TODO: Should we be doing something special with settings at
                 # this point?
-                yuglify_bin_dir = os.path.join(new_virtualenv_symlink, 'node_modules', 'yuglify', 'bin')
+                yuglify_bin_dir = join(new_virtualenv_symlink, 'node_modules', 'yuglify', 'bin')
                 sudo('export PATH="{}:$PATH" && ./manage.py collectstatic --noinput'.format(yuglify_bin_dir))
                 sudo('./manage.py syncdb --noinput')
                 sudo('./manage.py migrate')
