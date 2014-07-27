@@ -61,3 +61,12 @@ def deploy(committish):
                 sudo('pip install -q -r ' + new_requirements)
             with cd(new_virtualenv_symlink):
                 sudo('npm install yuglify')
+
+        with virtualenv(new_virtualenv_symlink):
+            with cd(new_repo_dir):
+                # TODO: Should we be doing something special with settings at
+                # this point?
+                yuglify_bin_dir = os.path.join(new_virtualenv_symlink, 'node_modules', 'yuglify', 'bin')
+                sudo('export PATH="{}:$PATH" && ./manage.py collectstatic --noinput'.format(yuglify_bin_dir))
+                sudo('./manage.py syncdb --noinput')
+                sudo('./manage.py migrate')
