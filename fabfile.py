@@ -42,7 +42,12 @@ def deploy(committish):
         diff_command = "diff {} {}"
         diff = sudo(diff_command.format(current_requirements, new_requirements),
                     warn_only=True)
-        if diff.return_code != 0:
+        if diff.return_code == 0:
+            # requirements.txt for the new release is the same as for the
+            # current one, so we can re-use its virtualenv.
+            current_virtualenv = sudo("readlink -n -f " + os.path.join(current_release_dir, 'virtualenv'))
+            sudo("ln -s {} {}".format(current_virtualenv, new_virtualenv_symlink))
+        else:
             # This means that either requirements.txt has changes or that this
             # is the first deploy and current_requirements doesn't exist. In
             # both cases we need to create a new virtualenv.
