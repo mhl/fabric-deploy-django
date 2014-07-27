@@ -1,7 +1,7 @@
 from datetime import datetime
 from os.path import join
 
-from fabric.api import env, run, settings, sudo, cd
+from fabric.api import env, settings, sudo, cd
 from fabvenv import virtualenv
 
 
@@ -10,10 +10,6 @@ env.use_ssh_config = True
 
 unix_user = 'example'
 site_root = '/var/www/example.com'
-
-
-def host_type():
-    run('uname -s')
 
 
 def deploy(committish):
