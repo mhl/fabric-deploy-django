@@ -1,7 +1,7 @@
 from datetime import datetime
 from os.path import join
 
-from fabric.api import env, settings, sudo, cd
+from fabric.api import env, task, settings, sudo, cd
 from fabvenv import virtualenv
 
 
@@ -12,6 +12,7 @@ unix_user = 'example'
 site_root = '/var/www/example.com'
 
 
+@task
 def deploy(committish):
     with settings(sudo_user=unix_user):
         timestamp = datetime.utcnow().replace(microsecond=0).isoformat()
