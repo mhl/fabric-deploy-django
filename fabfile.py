@@ -40,9 +40,8 @@ def deploy(committish):
         current_requirements = os.path.join(current_repo_dir, 'requirements.txt')
         new_virtualenv_symlink = os.path.join(new_release_dir, 'virtualenv')
 
-        diff_command = "diff {} {}"
-        diff = sudo(diff_command.format(current_requirements, new_requirements),
-                    warn_only=True)
+        diff_command = "diff {} {}".format(current_requirements, new_requirements)
+        diff = sudo(diff_command, warn_only=True)
         if diff.return_code == 0:
             # requirements.txt for the new release is the same as for the
             # current one, so we can re-use its virtualenv.
