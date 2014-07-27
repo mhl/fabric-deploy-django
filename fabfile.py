@@ -37,14 +37,7 @@ def deploy(committish):
         current_requirements = join(current_repo_dir, 'requirements.txt')
         new_virtualenv_symlink = join(new_release_dir, 'virtualenv')
 
-        diff_command = "diff {} {}".format(current_requirements, new_requirements)
-        diff = sudo(diff_command, warn_only=True)
-        if diff.return_code == 0:
-            # requirements.txt for the new release is the same as for the
-            # current one, so we can re-use its virtualenv.
-            current_virtualenv = sudo("readlink -n -f " + join(current_release_dir, 'virtualenv'))
-            sudo("ln -s {} {}".format(current_virtualenv, new_virtualenv_symlink))
-        else:
+        if requirements_changed(current_requirements, new_requirements):
             # This means that either requirements.txt has changes or that this
             # is the first deploy and current_requirements doesn't exist. In
             # both cases we need to create a new virtualenv.
@@ -57,6 +50,11 @@ def deploy(committish):
                 sudo('pip install -q -r ' + new_requirements)
             with cd(new_virtualenv_symlink):
                 sudo('npm install yuglify')
+        else:
+            # requirements.txt for the new release is the same as for the
+            # current one, so we can re-use its virtualenv.
+            current_virtualenv = sudo("readlink -n -f " + join(current_release_dir, 'virtualenv'))
+            sudo("ln -s {} {}".format(current_virtualenv, new_virtualenv_symlink))
 
         with virtualenv(new_virtualenv_symlink):
             with cd(new_repo_dir):
@@ -71,3 +69,9 @@ def deploy(committish):
         # -f and -n are needed to make sure that it overwrites the existing
         # 'current' symlink:
         sudo("ln -sfn {} {}".format(timestamp, current_release_dir))
+
+
+def requirements_changed(current, new):
+    diff_command = "diff {} {}".format(current, new)
+    diff = sudo(diff_command, warn_only=True)
+    return diff.return_code != 0
