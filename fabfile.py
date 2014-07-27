@@ -5,6 +5,7 @@ from fabric.api import env, run, settings, sudo, cd
 from fabvenv import virtualenv
 
 
+env.sudo_prefix += '-H '
 env.use_ssh_config = True
 
 unix_user = 'example'
@@ -18,6 +19,7 @@ def host_type():
 def deploy(committish):
     with settings(sudo_user=unix_user):
         timestamp = datetime.utcnow().replace(microsecond=0).isoformat()
+        timestamp = timestamp.replace(':', '.')
 
         new_release_dir = os.path.join(site_root, 'releases', timestamp)
         new_repo_dir = os.path.join(new_release_dir, 'example-repository')
@@ -57,3 +59,5 @@ def deploy(committish):
             sudo("ln -s {} {}".format(new_virtualenv_dir, new_virtualenv_symlink))
             with virtualenv(new_virtualenv_symlink):
                 sudo('pip install -q -r ' + new_requirements)
+            with cd(new_virtualenv_symlink):
+                sudo('npm install yuglify')
