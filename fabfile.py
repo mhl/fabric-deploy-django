@@ -72,6 +72,8 @@ class DeployTask(Task):
             # 'current' symlink:
             sudo("ln -sfn {} {}".format(timestamp, current_release_dir))
 
+        sudo("service example-unicorn restart")
+
     def requirements_changed(self, current, new):
         diff_command = "diff {} {}".format(current, new)
         diff = sudo(diff_command, warn_only=True)
