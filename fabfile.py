@@ -29,7 +29,7 @@ class DeployTask(Task):
             with cd(new_release_dir):
                 # Assume that the user has a deploy key for this repo - this
                 # should be created by puppet and manually added to the repo
-                sudo('git clone -q git@github.com:mhl/example-repository.git')
+                sudo('git clone -q --recursive git@github.com:mhl/example-repository.git')
 
             with cd(new_repo_dir):
                 sudo('git checkout {}'.format(committish))
