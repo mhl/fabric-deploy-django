@@ -76,7 +76,7 @@ class DeployTask(Task):
 
     def requirements_changed(self, current, new):
         diff_command = "diff {} {}".format(current, new)
-        diff = sudo(diff_command, warn_only=True)
+        diff = sudo(diff_command, quiet=True)
         return diff.return_code != 0
 
 deploy = DeployTask()
