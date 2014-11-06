@@ -1,7 +1,7 @@
 from datetime import datetime
 from os.path import join
 
-from fabric.api import env, settings, sudo, cd
+from fabric.api import env, run, settings, sudo, cd
 from fabric.tasks import Task
 from fabvenv import virtualenv
 
@@ -72,7 +72,7 @@ class DeployTask(Task):
             # 'current' symlink:
             sudo("ln -sfn {} {}".format(timestamp, current_release_dir))
 
-        sudo("service example-unicorn restart")
+        run("sudo service example-unicorn restart")
 
     def requirements_changed(self, current, new):
         diff_command = "diff {} {}".format(current, new)
