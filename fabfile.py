@@ -74,6 +74,12 @@ class DeployTask(Task):
 
         run("sudo service example-unicorn restart")
 
+        if env.host_string == 'asti':
+            with settings(sudo_user=unix_user):
+                with cd(new_repo_dir):
+                    sudo('git push -f origin {}:refs/heads/deployed'.format(committish))
+
+
     def requirements_changed(self, current, new):
         diff_command = "diff {} {}".format(current, new)
         diff = sudo(diff_command, quiet=True)
