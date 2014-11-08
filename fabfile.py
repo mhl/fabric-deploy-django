@@ -15,6 +15,7 @@ site_root = '/var/www/example.com'
 
 class DeployTask(Task):
     name = 'deploy'
+
     def run(self, committish):
         with settings(sudo_user=unix_user):
             timestamp = datetime.utcnow().replace(microsecond=0).isoformat()
