@@ -74,8 +74,7 @@ class DeployTask(Task):
                     # this point?
                     yuglify_bin_dir = join(new_virtualenv_symlink, 'node_modules', 'yuglify', 'bin')
                     sudo('export PATH="{}:$PATH" && ./manage.py collectstatic --noinput'.format(yuglify_bin_dir))
-                    sudo('./manage.py syncdb --noinput')
-                    sudo('./manage.py migrate')
+                    sudo('./manage.py migrate --noinput')
 
             # FIXME: we actually want to do this in a gunicorn pre_exec hook
             # -f and -n are needed to make sure that it overwrites the existing
