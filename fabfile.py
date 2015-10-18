@@ -3,6 +3,7 @@ from os.path import join
 
 from fabric.api import env, run, settings, sudo, cd
 from fabric.tasks import Task
+from fabric.utils import abort
 from fabvenv import virtualenv
 
 
@@ -16,7 +17,10 @@ site_root = '/var/www/example.com'
 class DeployTask(Task):
     name = 'deploy'
 
-    def run(self, committish):
+    def run(self, committish, fake_initial_migrations='no'):
+        if fake_initial_migrations not in ('yes', 'no'):
+            abort("fake_initial_migrations must be either 'yes' or 'no' (default is 'no')")
+
         with settings(sudo_user=unix_user):
             timestamp = datetime.utcnow().replace(microsecond=0).isoformat()
             timestamp = timestamp.replace(':', '.')
@@ -74,7 +78,11 @@ class DeployTask(Task):
                     # this point?
                     yuglify_bin_dir = join(new_virtualenv_symlink, 'node_modules', 'yuglify', 'bin')
                     sudo('export PATH="{}:$PATH" && ./manage.py collectstatic --noinput'.format(yuglify_bin_dir))
-                    sudo('./manage.py migrate --noinput')
+
+                    migrate_command = './manage.py migrate --noinput'
+                    if fake_initial_migrations == 'yes':
+                        migrate_command += ' --fake-initial'
+                    sudo(migrate_command)
 
             # FIXME: we actually want to do this in a gunicorn pre_exec hook
             # -f and -n are needed to make sure that it overwrites the existing
