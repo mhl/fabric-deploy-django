@@ -1,4 +1,4 @@
-from django_base import DjangoDeployTask
+from fabric_django_deploy import DjangoDeployTask
 
 
 class ExampleDeployTask(DjangoDeployTask):
