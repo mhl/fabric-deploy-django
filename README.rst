@@ -11,7 +11,7 @@ sites.
 
 For example, you can create a fabfile.py like this::
 
-  from fabric_django_deploy import DjangoDeployTask
+  from fabric_deploy_deploy import DjangoDeployTask
 
   class ExampleDeployTask(DjangoDeployTask):
 
