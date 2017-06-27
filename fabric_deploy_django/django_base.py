@@ -69,6 +69,7 @@ class DjangoDeployTask(Task):
 
                 sudo("ln -s {} {}".format(new_virtualenv_dir, new_virtualenv_symlink))
                 with virtualenv(new_virtualenv_symlink):
+                    sudo('pip install -U pip')
                     sudo('pip install -q -r ' + new_requirements)
                 with cd(new_virtualenv_symlink):
                     sudo('npm install yuglify')
