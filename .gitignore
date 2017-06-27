@@ -1,1 +1,2 @@
 *.pyc
+/fabric_deploy_django.egg-info
