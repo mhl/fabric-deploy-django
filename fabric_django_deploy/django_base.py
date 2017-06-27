@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from datetime import datetime
 from os.path import join
 
@@ -22,7 +24,8 @@ class DjangoDeployTask(Task):
 
     def run(self, committish, fake_initial_migrations='no'):
         if fake_initial_migrations not in ('yes', 'no'):
-            abort("fake_initial_migrations must be either 'yes' or 'no' (default is 'no')")
+            abort("fake_initial_migrations must be either 'yes' or 'no' "
+                  "(default is 'no')")
 
         with settings(sudo_user=self.unix_user):
             timestamp = datetime.utcnow().replace(microsecond=0).isoformat()

@@ -1,1 +1,1 @@
-from .django_base import DjangoDeployTask
+from .django_base import DjangoDeployTask # noqa
