@@ -96,12 +96,15 @@ class DjangoDeployTask(Task):
             # 'current' symlink:
             sudo("ln -sfn {} {}".format(timestamp, current_release_dir))
 
-        run("sudo service {0} restart".format(self.service_name))
+        self.restart_workers()
 
         if env.host_string == 'asti':
             with settings(sudo_user=self.unix_user):
                 with cd(new_repo_dir):
                     sudo('git push -f origin {}:refs/heads/deployed'.format(committish))
+
+    def restart_workers(self):
+        run("sudo service {0} restart".format(self.service_name))
 
     def requirements_changed(self, current, new):
         diff_command = "diff {} {}".format(current, new)
