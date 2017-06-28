@@ -81,6 +81,8 @@ class DjangoDeployTask(Task):
 
             with virtualenv(new_virtualenv_symlink):
                 with cd(new_repo_dir):
+                    self.just_before_collectstatic()
+
                     # TODO: Should we be doing something special with settings at
                     # this point?
                     yuglify_bin_dir = join(new_virtualenv_symlink, 'node_modules', 'yuglify', 'bin')
@@ -104,6 +106,9 @@ class DjangoDeployTask(Task):
             with settings(sudo_user=self.unix_user):
                 with cd(new_repo_dir):
                     sudo('git push -f origin {}:refs/heads/deployed'.format(committish))
+
+    def just_before_collectstatic(self):
+        pass
 
     def just_before_restart(self):
         pass
