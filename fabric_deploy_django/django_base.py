@@ -91,6 +91,8 @@ class DjangoDeployTask(Task):
                         migrate_command += ' --fake-initial'
                     sudo(migrate_command)
 
+                    self.just_before_restart()
+
             # FIXME: we actually want to do this in a gunicorn pre_exec hook
             # -f and -n are needed to make sure that it overwrites the existing
             # 'current' symlink:
@@ -102,6 +104,9 @@ class DjangoDeployTask(Task):
             with settings(sudo_user=self.unix_user):
                 with cd(new_repo_dir):
                     sudo('git push -f origin {}:refs/heads/deployed'.format(committish))
+
+    def just_before_restart(self):
+        pass
 
     def restart_workers(self):
         run("sudo service {0} restart".format(self.service_name))
